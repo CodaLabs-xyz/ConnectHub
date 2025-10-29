@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   const config = {
+    accountAssociation: {
+      header: "eyJmaWQiOjIxMDY3MSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDAxMUM1RjM3N2M2OTY4ZjhDOGNGODZmY0Y3OEYxMUFhOTgyMmJFOEYifQ",
+      payload: "eyJkb21haW4iOiJjb25uZWN0aHViLmNvZGFsYWJzLnh5eiJ9",
+      signature: "L1W1G6o+WQG83b7dl/a+sPV5BU0w/IDyxFh0E+OzCchr3Lsp24Sq0ScE/focGhyBdX2uvssJ3nt8fM0zQAGzbhw="
+    },
+
     frame: {
       name: process.env.NEXT_PUBLIC_SITE_NAME || 'Connect Hub',
       version: '1',

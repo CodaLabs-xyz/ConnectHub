@@ -1,4 +1,5 @@
-# Self Protocol Farcaster Mini App with WalletConnect
+# Connect Hub
+## Self Protocol Farcaster Mini App with WalletConnect
 
 A Farcaster Mini App template featuring Self Protocol identity verification with both backend API and on-chain smart contract verification modes.
 

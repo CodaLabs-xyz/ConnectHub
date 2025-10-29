@@ -539,7 +539,7 @@ function ContractVerificationContent({
   }, [address, contractAddress, contractChain, scope, appName])
 
   // Handle contract-specific deeplink verification
-  const handleContractVerify = () => {
+  const handleContractVerify = async () => {
     if (!contractUniversalLink) {
       setContractError('Universal link not available')
       return
@@ -547,12 +547,35 @@ function ContractVerificationContent({
 
     console.log('🔗 Opening contract verification deeplink:', contractUniversalLink)
 
-    // Open the deeplink
-    window.open(contractUniversalLink, '_blank')
+    try {
+      // Check if we're in Farcaster environment
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      const isInMiniAppResult = await sdk.isInMiniApp()
 
-    // Start processing and event polling
-    setIsProcessing(true)
-    setContractError(null)
+      if (isInMiniAppResult) {
+        // In Farcaster app - open with SDK
+        try {
+          await sdk.actions.openUrl(contractUniversalLink)
+          console.log('✅ Opened Self app with Farcaster SDK')
+        } catch (sdkError) {
+          console.error('Error opening Self app with SDK:', sdkError)
+          // Fallback to window.open
+          window.open(contractUniversalLink, '_blank')
+          console.log('⚠️ Fell back to window.open')
+        }
+      } else {
+        // In browser - open in new tab
+        window.open(contractUniversalLink, '_blank')
+        console.log('🌐 Opened Self app in new browser tab')
+      }
+
+      // Start processing and event polling
+      setIsProcessing(true)
+      setContractError(null)
+    } catch (err) {
+      console.error('Failed to open Self app:', err)
+      setContractError('Failed to open Self app')
+    }
   }
 
   // Poll for verification events when processing

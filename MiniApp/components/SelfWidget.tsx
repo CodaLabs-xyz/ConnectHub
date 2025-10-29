@@ -538,6 +538,23 @@ function ContractVerificationContent({
     initContractApp()
   }, [address, contractAddress, contractChain, scope, appName])
 
+  // Handle contract-specific deeplink verification
+  const handleContractVerify = () => {
+    if (!contractUniversalLink) {
+      setContractError('Universal link not available')
+      return
+    }
+
+    console.log('🔗 Opening contract verification deeplink:', contractUniversalLink)
+
+    // Open the deeplink
+    window.open(contractUniversalLink, '_blank')
+
+    // Start processing and event polling
+    setIsProcessing(true)
+    setContractError(null)
+  }
+
   // Poll for verification events when processing
   useEffect(() => {
     if (!isProcessing || !address || !contractAddress) return
@@ -801,19 +818,35 @@ function ContractVerificationContent({
         isVerified={isVerified}
         verificationData={verificationData}
         isVerifying={isProcessing || isVerifying}
-        error={error}
+        error={contractError || error}
         universalLink={contractUniversalLink || universalLink}
         linkCopied={linkCopied}
         selfApp={contractSelfApp || selfApp}
         showQR={showQR}
-        onVerify={onVerify}
-        onCopy={onCopy}
-        onClear={onClear}
+        onVerify={handleContractVerify}
+        onCopy={() => {
+          if (!contractUniversalLink) return
+          navigator.clipboard.writeText(contractUniversalLink)
+            .then(() => {
+              console.log('✅ Contract link copied')
+            })
+            .catch((err) => {
+              console.error('Failed to copy:', err)
+            })
+        }}
+        onClear={() => {
+          setContractVerified(false)
+          setContractVerificationData(null)
+          setTxHash(null)
+          setIsProcessing(false)
+          setContractError(null)
+        }}
         onToggleQR={onToggleQR}
         onVerificationSuccess={() => {
-          console.log('QR scan completed, transaction being processed...')
+          console.log('✅ QR scan completed, transaction being processed...')
           // Set processing state when QR scan completes
           setIsProcessing(true)
+          setContractError(null)
           // The event listener will handle setting verification data when blockchain event is received
         }}
         isAuthenticated={isAuthenticated}

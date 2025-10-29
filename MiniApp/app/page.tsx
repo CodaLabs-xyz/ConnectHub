@@ -20,10 +20,10 @@ export default function Home() {
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight">
-            Farcaster Mini App Template
+            Connect Hub - Farcaster Mini App Template
           </h1>
           <p className="text-muted-foreground">
-            Multi-platform wallet connection with Self, WalletConnect & Farcaster SDK
+            Multi-platform wallet connection with Self, WalletConnect, Farcaster SDK and Celo network.
           </p>
         </div>
 

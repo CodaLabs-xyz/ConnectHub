@@ -1,0 +1,44 @@
+# Full reference https://github.com/foundry-rs/foundry/tree/master/crates/config
+
+[profile.default]
+  auto_detect_solc = false
+  block_timestamp = 1_735_702_400 # January 1, 2025 at 00:00 GMT
+  bytecode_hash = "none"
+  evm_version = "paris"           # See https://www.evmdiff.com/features?name=PUSH0&kind=opcode
+  fuzz = { runs = 1_000 }
+  gas_reports = ["*"]
+  libs = ["lib"]
+  optimizer = true
+  optimizer_runs = 10_000
+  out = "out"
+  script = "script"
+  solc = "0.8.28"
+  src = "src"
+  test = "test"
+
+[profile.ci]
+  fuzz = { runs = 10_000 }
+  verbosity = 4
+
+[etherscan]
+  base = { key = "${BASESCAN_API_KEY}", url = "https://api.basescan.org/api", chain = 8453 }
+  base-sepolia = { key = "${BASESCAN_API_KEY}", url = "https://api-sepolia.basescan.org/api", chain = 84532 }
+  celo = { key = "${CELOSCAN_API_KEY}", url = "https://api.celoscan.io/api", chain = 42220 }
+  celo-sepolia = { key = "${CELOSCAN_API_KEY}", url = "https://api-alfajores.celoscan.io/api", chain = 44787 }
+
+[fmt]
+  bracket_spacing = true
+  int_types = "long"
+  line_length = 120
+  multiline_func_header = "all"
+  number_underscore = "thousands"
+  quote_style = "double"
+  tab_width = 4
+  wrap_comments = true
+
+[rpc_endpoints]
+  base = "https://mainnet.base.org"
+  base-sepolia = "https://sepolia.base.org"
+  celo = "https://forno.celo.org"
+  celo-sepolia = "https://alfajores-forno.celo-testnet.org"
+  localhost = "http://localhost:8545"

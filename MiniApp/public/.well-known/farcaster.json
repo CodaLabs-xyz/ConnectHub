@@ -1,0 +1,13 @@
+{
+  "frame": {
+    "name": "ConnectHub",
+    "version": "1",
+    "iconUrl": "https://connecthub.codalabs.xyz/icon.png",
+    "homeUrl": "https://connecthub.codalabs.xyz",
+    "imageUrl": "https://connecthub.codalabs.xyz/banner.png",
+    "buttonTitle": "Connect Your Wallet",
+    "splashImageUrl": "https://connecthub.codalabs.xyz/splash.png",
+    "splashBackgroundColor": "#1a1a2e",
+    "webhookUrl": "https://connecthub.codalabs.xyz/api/webhook"
+  }
+}

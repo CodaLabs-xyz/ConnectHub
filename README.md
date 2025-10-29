@@ -1,4 +1,5 @@
-# ConnectHub - Farcaster Mini App Template with Self Protocol Verification
+# Connect Hub
+## Self Protocol Farcaster Mini App with WalletConnect
 
 A production-ready Farcaster Mini App template that developers can use to build web applications with privacy-preserving identity verification. Works seamlessly inside Farcaster and as a standalone web app, featuring dual verification modes (Backend API + Smart Contract) with QR code and deeplink support.
 

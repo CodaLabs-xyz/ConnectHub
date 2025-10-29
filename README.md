@@ -15,7 +15,7 @@ This is a **developer template** for building Farcaster Mini Apps with Self Prot
 
 ## 🚀 Live Demo
 
-- **App URL**: [https://connecthub.codalabs.xyz](https://connecthub.codalabs.xyz)
+- **App URL**: [https://farcaster.xyz/miniapps/aybykrGNomla/connect-hub](https://farcaster.xyz/miniapps/aybykrGNomla/connect-hub)
 - **Farcaster Frame**: Available in Farcaster feeds
 - **Contract**: [0x5c36cfc25dce95976ce947daaea260b131776d2c](https://celoscan.io/address/0x5c36cfc25dce95976ce947daaea260b131776d2c) (Celo Mainnet)
 

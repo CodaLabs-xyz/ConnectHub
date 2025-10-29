@@ -1,0 +1,27 @@
+{
+  "name": "farcaster-miniapp-contracts",
+  "description": "Self Protocol verification contracts for Farcaster Mini App",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf cache out",
+    "build": "forge build",
+    "lint": "npm run lint:sol && npm run prettier:check",
+    "lint:sol": "forge fmt --check && solhint {script,src,test}/**/*.sol",
+    "prettier:check": "prettier --check **/*.{json,md,yml} --ignore-path=.prettierignore",
+    "prettier:write": "prettier --write **/*.{json,md,yml} --ignore-path=.prettierignore",
+    "test": "forge test",
+    "test:coverage": "forge coverage",
+    "deploy:base-sepolia": "./script/deploy-verification.sh base-sepolia",
+    "deploy:base": "./script/deploy-verification.sh base"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.3.0",
+    "@selfxyz/contracts": "^1.2.3",
+    "@selfxyz/core": "^0.0.25"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "solhint": "^5.1.0"
+  }
+}

@@ -7,7 +7,6 @@ export async function GET() {
       payload: "eyJkb21haW4iOiJjb25uZWN0aHViLmNvZGFsYWJzLnh5eiJ9",
       signature: "L1W1G6o+WQG83b7dl/a+sPV5BU0w/IDyxFh0E+OzCchr3Lsp24Sq0ScE/focGhyBdX2uvssJ3nt8fM0zQAGzbhw="
     },
-
     frame: {
       name: process.env.NEXT_PUBLIC_SITE_NAME || 'Connect Hub',
       version: '1',

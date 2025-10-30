@@ -15,7 +15,7 @@ This is a **developer template** for building Farcaster Mini Apps with Self Prot
 
 ## 🚀 Live Demo
 
-- **App URL**: [https://connecthub.codalabs.xyz](https://connecthub.codalabs.xyz)
+- **App URL**: [https://farcaster.xyz/miniapps/aybykrGNomla/connect-hub](https://farcaster.xyz/miniapps/aybykrGNomla/connect-hub)
 - **Farcaster Frame**: Available in Farcaster feeds
 - **Contract**: [0x5c36cfc25dce95976ce947daaea260b131776d2c](https://celoscan.io/address/0x5c36cfc25dce95976ce947daaea260b131776d2c) (Celo Mainnet)
 
@@ -353,6 +353,228 @@ forge coverage
 
 ## 📖 Architecture Deep Dive
 
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        UI[Next.js 14 App]
+        FC[Farcaster Context]
+        SC[Self Context]
+        WC[Wagmi Provider]
+    end
+
+    subgraph "Integration Layer"
+        SDK[Self Protocol SDK]
+        WCKIT[WalletConnect]
+        FSDK[Farcaster SDK]
+    end
+
+    subgraph "Verification Backends"
+        API[Backend API<br/>HTTPS Endpoint]
+        CONTRACT[Smart Contract<br/>Celo Mainnet]
+    end
+
+    subgraph "External Services"
+        SELF[Self Protocol App]
+        WALLET[User Wallets<br/>MetaMask/WC]
+        FARCASTER[Farcaster Network]
+    end
+
+    UI --> FC
+    UI --> SC
+    UI --> WC
+
+    FC --> FSDK
+    SC --> SDK
+    WC --> WCKIT
+
+    SDK --> SELF
+    SDK --> API
+    SDK --> CONTRACT
+
+    WC --> WALLET
+    FSDK --> FARCASTER
+
+    SELF -.->|ZK Proof| API
+    SELF -.->|ZK Proof| CONTRACT
+
+    API -.->|Verification Status| SDK
+    CONTRACT -.->|Blockchain Events| SDK
+
+    style UI fill:#2563eb,stroke:#1e40af,color:#fff
+    style SDK fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style API fill:#059669,stroke:#047857,color:#fff
+    style CONTRACT fill:#dc2626,stroke:#b91c1c,color:#fff
+    style SELF fill:#f59e0b,stroke:#d97706,color:#fff
+```
+
+### Component Architecture
+
+```mermaid
+graph LR
+    subgraph "App Router"
+        PAGE[page.tsx]
+        LAYOUT[layout.tsx]
+    end
+
+    subgraph "Core Components"
+        WIDGET[SelfWidget]
+        CONNECT[ConnectButton]
+        UI[shadcn/ui]
+    end
+
+    subgraph "Context Providers"
+        SELFCTX[SelfContext]
+        FARCTX[FarcasterContext]
+        WAGMICTX[WagmiProvider]
+    end
+
+    subgraph "Hooks & Utils"
+        PLATFORM[usePlatformDetection]
+        UTILS[Utilities]
+    end
+
+    PAGE --> WIDGET
+    PAGE --> CONNECT
+    WIDGET --> UI
+
+    LAYOUT --> SELFCTX
+    LAYOUT --> FARCTX
+    LAYOUT --> WAGMICTX
+
+    WIDGET --> SELFCTX
+    WIDGET --> FARCTX
+    CONNECT --> WAGMICTX
+
+    WIDGET --> PLATFORM
+    SELFCTX --> UTILS
+
+    style PAGE fill:#3b82f6,stroke:#2563eb,color:#fff
+    style WIDGET fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style SELFCTX fill:#ec4899,stroke:#db2777,color:#fff
+```
+
+### Verification Flow Sequences
+
+#### Backend API Verification Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Self SDK
+    participant Self App
+    participant Backend API
+    participant Database
+
+    User->>Frontend: Click "Verify with Self"
+    Frontend->>Self SDK: Initialize verification request
+    Self SDK->>Self SDK: Generate request with<br/>disclosures & scope
+
+    alt Desktop (QR Code)
+        Self SDK->>Frontend: Display QR code
+        User->>Self App: Scan QR code
+    else Mobile (Deeplink)
+        Self SDK->>Self App: Open via deeplink
+    end
+
+    Self App->>User: Show verification request
+    User->>Self App: Approve & generate ZK proof
+
+    Self App->>Backend API: POST /api/verify<br/>(ZK proof + wallet address)
+    Backend API->>Backend API: Validate proof
+    Backend API->>Database: Store verification data
+    Backend API-->>Self App: 200 OK
+
+    loop Polling every 2s (max 60s)
+        Frontend->>Backend API: GET /api/verify/status?address=0x...
+        Backend API->>Database: Query verification status
+        Database-->>Backend API: Verification data
+        Backend API-->>Frontend: Verification status
+    end
+
+    Frontend->>User: Show success ✅
+
+    Note over User,Database: Total time: ~5-10 seconds
+```
+
+#### Smart Contract Verification Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Self SDK
+    participant Self App
+    participant Celo Network
+    participant Contract
+
+    User->>Frontend: Click "Verify with Self"
+    Frontend->>Self SDK: Initialize contract verification
+    Self SDK->>Contract: Read contract address & ABI
+    Self SDK->>Self SDK: Generate contract-specific request
+
+    alt Desktop (QR Code)
+        Self SDK->>Frontend: Display QR code
+        User->>Self App: Scan QR code
+    else Mobile (Deeplink)
+        Self SDK->>Self App: Open via deeplink
+    end
+
+    Self App->>User: Show verification request<br/>+ gas estimate
+    User->>Self App: Approve & sign transaction
+
+    Self App->>Celo Network: Submit transaction<br/>(ZK proof + wallet address)
+    Celo Network->>Contract: storeVerification()
+    Contract->>Contract: Validate proof<br/>Store on-chain
+    Contract-->>Celo Network: Transaction confirmed
+    Celo Network-->>Self App: Transaction hash
+
+    loop Event listener (max 5 min)
+        Frontend->>Celo Network: Watch VerificationStored event
+        Celo Network-->>Frontend: Event emitted
+    end
+
+    Frontend->>Contract: Call isVerified(address)
+    Contract-->>Frontend: true + verification data
+    Frontend->>User: Show success ✅
+
+    Note over User,Contract: Total time: ~30-60 seconds<br/>Gas cost: ~0.01 CELO
+```
+
+#### Platform Detection Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Platform Hook
+    participant Farcaster SDK
+    participant Self SDK
+
+    User->>Frontend: Load application
+    Frontend->>Platform Hook: usePlatformDetection()
+
+    Platform Hook->>Platform Hook: Check User-Agent
+    Platform Hook->>Platform Hook: Check window.location
+    Platform Hook->>Farcaster SDK: Check SDK availability
+
+    alt In Farcaster App
+        Farcaster SDK-->>Platform Hook: SDK available
+        Platform Hook->>Frontend: {isFarcaster: true,<br/>isMobile: true}
+        Frontend->>Self SDK: Enable deeplink mode
+    else Standard Browser (Desktop)
+        Platform Hook->>Frontend: {isFarcaster: false,<br/>isMobile: false}
+        Frontend->>Self SDK: Enable QR code mode
+    else Standard Browser (Mobile)
+        Platform Hook->>Frontend: {isFarcaster: false,<br/>isMobile: true}
+        Frontend->>Self SDK: Enable deeplink mode
+    end
+
+    Frontend->>User: Render appropriate UI
+```
+
 ### Frontend Architecture
 
 - **Next.js 14** - App router with React Server Components
@@ -372,7 +594,7 @@ The app uses Self Protocol's privacy-preserving zero-knowledge proof system:
 4. **Verification** - Proof validated without revealing underlying identity data
 5. **Storage** - Verification result stored (backend DB or blockchain)
 
-### Event Handling Flow
+### Data Flow Summary
 
 **Backend Mode:**
 ```
